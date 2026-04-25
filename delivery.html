@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gourmet Delights - Delivery Panel</title>
+    <link rel="stylesheet" href="stylesheets/delivery.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Gourmet Delights</div> 
+            <div class="header-actions">
+                <button class="btn btn-refresh" onclick="loadDeliveryOrders()" title="Refresh Orders">
+                    🔄 Refresh
+                </button>
+                <button class="btn btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="total-orders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pending-dispatch">0</div>
+                <div class="stat-label">Pending Dispatch</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="out-for-delivery">0</div>
+                <div class="stat-label">Out for Delivery</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="delivered-today">0</div>
+                <div class="stat-label">Delivered Today</div>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('active')">Active Orders</button>
+            <button class="tab-btn" onclick="switchTab('history')">Order History</button>
+        </div>
+
+        <!-- Search for History -->
+        <div class="search-container" id="history-search-container" style="display: none;">
+            <input type="text" id="history-search" placeholder="Search by Tracking ID, Customer, or Address..." class="search-input">
+        </div>
+
+        <!-- Active Orders Tab -->
+        <div class="tab-content active" id="active-orders">
+            <div class="orders-section">
+                <h2 class="section-title">Active Delivery Orders</h2>
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Tracking ID</th>
+                                <th>Customer</th>
+                                <th>Delivery Address</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be loaded dynamically -->
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px;">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">📦</div>
+                                    <h3>No Orders in Delivery</h3>
+                                    <p style="color: #666; margin-top: 8px;">
+                                        Orders will appear here when you click "Move to Delivery" in the admin panel.
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order History Tab -->
+        <div class="tab-content" id="order-history">
+            <div class="orders-section">
+                <h2 class="section-title">Order History</h2>
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Tracking ID</th>
+                                <th>Customer</th>
+                                <th>Delivery Address</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Order history will be loaded dynamically -->
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 40px;">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                                    <h3>No Order History</h3>
+                                    <p style="color: #666; margin-top: 8px;">
+                                        Delivered and cancelled orders will appear here.
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>     
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details</h3>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="order-info-grid">
+                    <div class="info-section">
+                        <h4>Tracking Information</h4>
+                        <div class="info-item">
+                            <label>Tracking ID:</label>
+                            <span id="modal-order-id">#N/A</span>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4>Customer Information</h4>
+                        <div class="info-item">
+                            <label>Name:</label>
+                            <span id="modal-customer-name">N/A</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Phone:</label>
+                            <span id="modal-customer-phone">N/A</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span id="modal-customer-email">N/A</span>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4>Delivery Information</h4>
+                        <div class="info-item">
+                            <label>Address:</label>
+                            <span id="modal-customer-address">N/A</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Instructions:</label>
+                            <span id="modal-instructions">No special instructions</span>
+                        </div>
+                    </div>
+
+                    <div class="info-section full-width">
+                        <h4>Order Items</h4>
+                        <div class="order-items-list" id="modal-items-list">
+                            <div class="no-items">No items information available</div>
+                        </div>
+                    </div>
+
+                    <div class="info-section full-width">
+                        <h4>Order Timeline</h4>
+                        <div class="timeline" id="modal-timeline">
+                            <div class="timeline-item current">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-text">Order Received</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-text">Cooking</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-text">Picked Up</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-text">Out for Delivery</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-text">Delivered</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section full-width">
+                        <h4>Order Summary</h4>
+                        <div class="order-summary">
+                            <div class="summary-item">
+                                <span>Subtotal:</span>
+                                <span id="modal-subtotal">$0.00</span>
+                            </div>
+                            <div class="summary-item">
+                                <span>Tax:</span>
+                                <span id="modal-tax">$0.00</span>
+                            </div>
+                            <div class="summary-item total">
+                                <span>Total:</span>
+                                <span id="modal-total">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="action-buttons">
+                    <button class="btn btn-cooking" onclick="updateSelectedOrderStatus('Cooking')">
+                        🍳 Mark as Cooking
+                    </button>
+                    <button class="btn btn-picked-up" onclick="updateSelectedOrderStatus('Picked Up')">
+                        📦 Mark as Picked Up
+                    </button>
+                    <button class="btn btn-out-delivery" onclick="updateSelectedOrderStatus('Out for Delivery')">
+                        🚚 Mark as Out for Delivery
+                    </button>
+                    <button class="btn btn-delivered" onclick="updateSelectedOrderStatus('Delivered')">
+                        ✅ Mark as Delivered
+                    </button>
+                    <button class="btn btn-call" onclick="callCustomer()">
+                        📞 Call Customer
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="JavaScripts/storage.js"></script>
+    <script src="JavaScripts/delivery.js"></script>
+</body>
+</html>

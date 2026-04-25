@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Boy Login | Gourmet Delights</title>
+    <link rel="stylesheet" href="stylesheets/index.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Delivery Boy Login</h2>
+        <form id="deliveryLoginForm">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" required> <!-- Changed from type="username" to type="text" -->
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <p id="loginMessage" style="color:red;"></p>
+    </div>
+
+    <script src="JavaScripts/storage.js"></script>
+    <script>
+    const form = document.getElementById('deliveryLoginForm');
+    const loginMessage = document.getElementById('loginMessage');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            if (username === "delivery" && password === "delivery") {
+                // Login successful
+                localStorage.setItem("deliveryLoggedIn", "true");
+                localStorage.setItem("deliveryUser", username);
+                window.location.href = 'delivery.html';
+            } else {
+                loginMessage.textContent = "Invalid credentials";
+            }
+        } catch (err) {
+            loginMessage.textContent = 'Server error. Try again.';
+            console.error(err);
+        }
+    });
+    </script>
+
+</body>
+</html>
